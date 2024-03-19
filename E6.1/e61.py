@@ -5,20 +5,25 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
 
-if __name__ == '__main__':
-    print('GNN = (#correct predictions) / (#training points)')
-    print('Multi-Class Classification (5 classes), repeat 30 times:')
-    for _ in range(30):
-        # Generate synthetic data (you can replace this with your own dataset)
+if __name__ == "__main__":
+    dim = [2, 4, 8, 16]
+    # Initialize KNN classifier
+    knn_model = KNeighborsClassifier(n_neighbors=1)
+    print("Binary Classification:")
+    res = []
+    for d in dim:
+        # Generate synthetic data
         X, y = make_classification(
-            n_samples=10000, n_features=50, n_redundant=0, n_classes=3, n_informative=49
+            n_samples=1000,
+            n_features=d,
+            n_informative=d,
+            n_redundant=0,
+            n_classes=2,
+            n_clusters_per_class=1,
         )
 
         # Split data into training and test sets
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.69)
-
-        # Initialize KNN classifier with k=3 (you can choose a different k)
-        knn_model = KNeighborsClassifier(n_neighbors=1000)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.996)
 
         # Fit the model to the training data
         knn_model.fit(X_train, y_train)
@@ -30,5 +35,9 @@ if __name__ == '__main__':
         acc = accuracy_score(y_test, y_pred)
         # print(f"Accuracy: {acc:.2f}")
 
-        gnn = acc * y_test.shape[0] / X_train.shape[0]
-        print(f'GNN: {gnn}')
+        avg_mem_size = acc * 2**d
+        print(
+            f"d={d}: n_full={2**d}, Avg. req. points for memorization n_avg={avg_mem_size:.2f}, n_full/n_avg={(2**d)/avg_mem_size}"
+        )
+
+        res.append((2**d) / avg_mem_size)
